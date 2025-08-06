@@ -1,0 +1,17 @@
+
+standalone 应用模式部署 启动jobmaster
+bin/standalone-job.sh start --job-classname com.spdbccc.test02.StreamWordCount
+[atguigu@hadoop102 flink14]$ jps
+3158 Jps
+3087 StandaloneApplicationClusterEntryPoint
+启动taskManager
+bin/taskmanager.sh start
+[atguigu@hadoop102 flink14]$ jpsall
+=============== hadoop102 ===============
+3504 TaskManagerRunner
+3087 StandaloneApplicationClusterEntryPoint
+=============== hadoop103 ===============
+=============== hadoop104 ===============
+
+应用模式启动 webui界面是没有submit job的界面的
+为每一个单独的job启动一个webui

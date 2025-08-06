@@ -1,0 +1,6 @@
+
+Caused by: org.apache.flink.table.api.Valida ationException: Could not find any factory for identifier 'hive’that implements'org. a apache. flink. table. planner. delegation. ParserFactory’in the classpath.
+
+
+
+Trying to recover from a global failure.org.apache.flink.util.FlinkException:Inconsistent execution state after stopping with savepoint.At least one'execution is still in one of the following states: CANCELEDA global fail-over is triggered to recover the job 55b195624385bd85699633c2cbb29463

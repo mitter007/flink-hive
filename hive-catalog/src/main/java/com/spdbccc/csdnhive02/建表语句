@@ -1,0 +1,34 @@
+create table catalog.hive_log(
+                  user_id String,
+                  order_amount double)
+
+
+{"user_id": "1001","order_amount": "100","order_total_amount": "200","log_ts": "3000"}
+{"user_id": "1001","order_amount": "100","order_total_amount": "200","log_ts": "16000"}
+{"user_id": "1001","order_amount": "100","order_total_amount": "200","log_ts": "64000"}
+{"user_id": "1001","order_amount": "100","order_total_amount": "200","log_ts": "100000"}
+{"user_id": "1001","order_amount": "100","order_total_amount": "200","log_ts": "200000"}
+{"user_id": "1001","order_amount": "100","order_total_amount": "200","log_ts": "3000000"}
+{"user_id": "1001","order_amount": "100","order_total_amount": "200","log_ts": "3600000"}
+{"user_id": "1001","order_amount": "100","order_total_amount": "200","log_ts": "3600000"}
+{"user_id": "1006","order_amount": "100","order_total_amount": "200","log_ts": "10000000"}
+{"user_id": "1007","order_amount": "100","order_total_amount": "200","log_ts": "20000000"}
+{"user_id": "1007","order_amount": "100","order_total_amount": "200","log_ts": "1000000000"}
+{"user_id": "1007","order_amount": "100","order_total_amount": "200","log_ts": "2000000000"}
+{"user_id": "1007","order_amount": "100","order_total_amount": "200","log_ts": "2000000000"}
+{"user_id": "1007","order_amount": "100","order_total_amount": "200","log_ts": "1691996342000"}
+
+
+CREATE TABLE t1_pt(
+    id string,
+    ts bigint,
+    vc int
+) WITH (
+  'connector' = 'kafka',
+  'properties.bootstrap.servers' = 'hadoop102:9092',
+  'properties.group.id' = 'test1',
+  'scan.startup.mode' = 'group-offsets',
+  'sink.partitioner' = 'fixed',
+  'topic' = 'csdn03',
+  'format' = 'json'
+)

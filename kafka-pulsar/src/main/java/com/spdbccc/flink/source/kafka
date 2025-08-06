@@ -1,0 +1,7 @@
+kafka-topics.sh --bootstrap-server <kafka-bootstrap-servers> --create --topic <topic-name> --partitions <partition-count> --replication-factor <replication-factor> --config <config-props>
+11313
+11313
+11313
+11313
+11313
+11313

@@ -1,0 +1,88 @@
+一、依赖
+<dependencies>
+    <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.17</version>
+    </dependency>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.13.2</version>
+    </dependency>
+</dependencies>
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.8.1</version>
+            <configuration>
+                <source>${maven.compiler.source}</source>
+                <target>${maven.compiler.target}</target>
+                <encoding>UTF-8</encoding>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+二、java代码
+
+public class Log4JTest {
+
+    public static void main(String[] args) {
+        //获取Logger对象的实例
+        Logger logger = Logger.getLogger(Log4JTest.class);
+        logger.debug("这是debug");
+        logger.info("这是info");
+        logger.warn("这是warn");
+        logger.error("这是error");
+        logger.fatal("这是fatal");
+    }
+
+}
+加上这个不然会报错
+BasicConfigurator.configure();
+
+
+结果
+0 [main] INFO com.ydlclass.entity.Log4jTest  - hello log4j
+1 [main] FATAL com.ydlclass.entity.Log4jTest  - fatal
+1 [main] ERROR com.ydlclass.entity.Log4jTest  - error
+1 [main] WARN com.ydlclass.entity.Log4jTest  - warn
+1 [main] INFO com.ydlclass.entity.Log4jTest  - info
+1 [main] DEBUG com.ydlclass.entity.Log4jTest  - debug
+
+log4j定义了以下的日志的级别，和JUL的略有不同：
+
+fatal 指出每个严重的错误事件将会导致应用程序的退出。
+error 指出虽然发生错误事件，但仍然不影响系统的继续运行。
+warn 表明会出现潜在的错误情形。
+info 一般和在粗粒度级别上，强调应用程序的运行全程。
+debug 一般用于细粒度级别上，对调试应用程序非常有帮助。
+trace 是程序追踪，可以用于输出程序运行中的变量，显示执行的流程。
+和JUL一样：还有两个特殊的级别：OFF，可用来关闭日志记录。 ALL，启用所有消息的日志记录。
+
+一般情况下，我们只使用4个级别，优先级从高到低为 ERROR > WARN > INFO > DEBUG。
+
+二、组件讲解
+Log4J 主要由 Loggers (日志记录器)、Appenders（输出端）和 Layout（日志格式化器）组成。其中 Loggers 控制日志的输出级别与日志是否输出；Appenders 指定日志的输出方式（输出到控制台、文件 等）；Layout 控制日志信息的输出格式。
+
+#1、Loggers
+日志记录器：负责收集处理日志记录，实例的命名就是类“XX”的full quailied name（类的全限定名）， Logger的名字大小写敏感，其命名有继承机制：例如：name为com.ydlclass.service的logger会继承 name为com.ydlclass的logger，和JUL一致。
+Log4J中有一个特殊的logger叫做“root”，他是所有logger的根，也就意味着其他所有的logger都会直接 或者间接地继承自root。root logger可以用Logger.getRootLogger()方法获取。 JUL是不是也有一个名为.的根。
+
+#2、Appenders
+Appender和JUL的Handler很像，用来指定日志输出到哪个地方，可以同时指定日志的输出目的地。Log4j 常用的输出目的地 有以下几种：
+
+输出端类型	作用
+ConsoleAppender	将日志输出到控制台
+FileAppender	将日志输出到文件中
+DailyRollingFileAppender	将日志输出到一个日志文件，并且每天输出到一个新的文件
+RollingFileAppender	将日志信息输出到一个日志文件，并且指定文件的尺寸，当文件大 小达到指定尺寸时，会自动把文件改名，同时产生一个新的文件
+JDBCAppender	把日志信息保存到数据库中
+
+
+
+Layouts 布局安排

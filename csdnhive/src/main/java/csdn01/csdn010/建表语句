@@ -1,0 +1,61 @@
+基于处理时间的t1_pt;
+CREATE TABLE t1_pt(
+    id string,
+    ts bigint,
+    vc int,
+    pt AS PROCTIME()
+) WITH (
+  'connector' = 'kafka',
+  'properties.bootstrap.servers' = 'hadoop102:9092',
+  'properties.group.id' = 'test1',
+  'scan.startup.mode' = 'group-offsets',
+  'sink.partitioner' = 'fixed',
+  'topic' = 'test_1109',
+  'format' = 'json'
+);
+
+
+按天分区
+        tableEnv.executeSql("CREATE TABLE IF NOT EXISTS t3hiveTable ("
+
+                + "id STRING,"
+
+                + "ts bigint,"
+                + "vc int"
+                + ")"
+
+                + " PARTITIONED BY (dt STRING) STORED AS parquet TBLPROPERTIES ("
+
+                + " 'partition.time-extractor.timestamp-pattern'='$dt'," // hive 分区提取器提取时间戳的格式
+
+                + " 'sink.partition-commit.trigger'='process-time'," // 分区触发提交的类型可以指定 "process-time" 和 "partition-time" 处理时间和分区时间
+
+                + " 'sink.partition-commit.delay'='5s'," // 提交延迟
+//                + " 'table.exec.source.idle-timeout'='10s'," //  如果 topic 中的某些分区闲置，watermark 生成器将不会向前推进。 你可以在表配置中设置 'table.exec.source.idle-timeout' 选项来避免上述问题
+                + " 'sink.partition-commit.watermark-time-zone'='Asia/Shanghai', " //-- Assume user configured time zone is 'Asia/Shanghai'
+                + " 'sink.partition-commit.policy.kind'='metastore,success-file'" // 提交类型
+
+                + ")");
+
+
+按小时分区
+        tableEnv.executeSql("CREATE TABLE IF NOT EXISTS t2hiveTable ("
+
+                + "id STRING,"
+
+                + "ts bigint,"
+                + "vc int"
+                + ")"
+
+                + " PARTITIONED BY (dt STRING, hr STRING) STORED AS parquet TBLPROPERTIES ("
+
+                + " 'partition.time-extractor.timestamp-pattern'='$dt $hr:00:00'," // hive 分区提取器提取时间戳的格式
+
+                + " 'sink.partition-commit.trigger'='process-time'," // 分区触发提交的类型可以指定 "process-time" 和 "partition-time" 处理时间和分区时间
+
+                + " 'sink.partition-commit.delay'='5s'," // 提交延迟
+//                + " 'table.exec.source.idle-timeout'='10s'," //  如果 topic 中的某些分区闲置，watermark 生成器将不会向前推进。 你可以在表配置中设置 'table.exec.source.idle-timeout' 选项来避免上述问题
+                + " 'sink.partition-commit.watermark-time-zone'='Asia/Shanghai', " //-- Assume user configured time zone is 'Asia/Shanghai'
+                + " 'sink.partition-commit.policy.kind'='metastore,success-file'" // 提交类型
+
+                + ")");

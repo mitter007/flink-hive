@@ -1,0 +1,40 @@
+使用datastream和hive catalog的方式
+① 采用从元素中new 了几个 watwesenor读数据的方式 KafkaHive01
+写入到hive表中
++----------------------------+
+| myhive.catalog.t5hiveTable |
++----------------------------+
+|                         -1 |
++----------------------------+
+1 row in set
+打印到控制台的，输出结果
+数据也成功写出到hive表里面t5hivetable;
+②试试从端口中读取数据转换成javabean KafkaHive02
+  DataStreamSource<String> streamSource = env.socketTextStream("hadoop103", 7777);
+  从端口中读数据数据是可以写出的
+  端口中的数据也是一个无界流啊
+③从kafka中读数据
+使用kafkasource的方式数据是成功写入到hive里面了
+这种方式绝对没问题啊
+④试试使用
+kafkaconsumer的方式
+也是可以写出的
+又出现了不可以的现象
+还是写不出
+到底怎么回事？
+  Properties properties = new Properties();
+        properties.setProperty("bootstrap.servers", "hadoop102:9092");
+        properties.setProperty("group.id", "109");
+        properties.setProperty("auto.offset.reset","latest");
+        就这种写法写不进去
+⑤
+用老师的写法就没有问题，可以写进去
+       Properties properties = new Properties();
+        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,"hadoop102:9092");
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "109");
+        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+
+        DataStreamSource<String> streamSource = env.addSource(new FlinkKafkaConsumer<>("csdn02",
+                new SimpleStringSchema(), properties));
+
+                插入hive表数据   INSERT INTO t1hiveTable(id,ts,vc) values(’12‘,’1‘,’1‘)

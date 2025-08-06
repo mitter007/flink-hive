@@ -1,0 +1,61 @@
+com.spdbccc.test02.Hive_Catalog_01
+
+启动  yarn 单作业模式
+bin/flink run -d -t yarn-per-job -c com.spdbccc.test02.Hive_Catalog_01
+
+CREATE TABLE t1( id string, ts bigint , vc int ,PRIMARY KEY (`ts` ) NOT ENFORCED)
+WITH (
+  'connector' = 'kafka',
+  'properties.bootstrap.servers' = 'hadoop102:9092',
+  'properties.group.id' = 'test1' ,
+  'scan.startup.mode' = 'group-offsets' ,
+'sink.partitioner' = 'fixed',
+  'topic' = 'catalog01',
+  'format' = 'json'
+);
+创建hive表
+create table HiveSink(
+id string,ts bigint,vc int
+)
+with (
+'connector' = 'filesystem',
+'path' = 'hdfs://hadoop102:8020/user/hive/test/HiveSink')
+;
+
+create table HiveSink(
+id string,ts bigint,vc int
+)
+ insert into HiveSink select id,ts,vc from  t1;
+
+ {"id":"25","ts":25,"vc":12}
+ {"id":"25","ts":25,"vc":12}
+ {"id":"25","ts":36,"vc":12}
+ {"id":"28","ts":36,"vc":12}
+
+CREATE TABLE user_log_no_partition (
+  user_id STRING
+  ,item_id STRING
+  ,category_id STRING
+  ,behavior STRING
+  ,ds STRING
+)
+STORED AS parquet;
+
+insert into user_log_no_partition
+select user_id, item_id, category_id, behavior, DATE_FORMAT(now(), 'yyyy-MM-dd')
+from user_log;
+
+
+hive表
+SET table.sql-dialect=hive;
+CREATE TABLE hive_table (
+  id STRING,
+  ts BIGINT,
+  vc BIGINT
+) PARTITIONED BY (dt STRING, hr STRING) STORED AS parquet TBLPROPERTIES (
+  'partition.time-extractor.timestamp-pattern'='$dt $hr:00:00',
+  'sink.partition-commit.trigger'='partition-time',
+  'sink.partition-commit.delay'='1 h',
+  'sink.partition-commit.policy.kind'='metastore,success-file'
+);
+

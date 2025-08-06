@@ -1,0 +1,48 @@
+DROP TABLE IF EXISTS hive_ccgl_glacgd;
+CREATE EXTERNAL TABLE hive_ccgl_glacgd
+(
+    `id`               STRING COMMENT '编号',
+    `name`             STRING COMMENT '分类名称',
+    `create_time`    decimal(24,2) COMMENT '创建时间',
+    `operate_time`   STRING COMMENT '修改时间'
+) COMMENT '会计日终余额表'
+    STORED AS parquet;
+
+
+content
+
+
+/bin/pulsar-client produce demo -n 2 -m '"{"id":"25"}"'
+
+DROP TABLE IF EXISTS hive_pulsar01;
+CREATE EXTERNAL TABLE hive_pulsar01
+(
+String  customerId    string,
+String  cardNumber    string,
+String  accountNumber string,
+String  scenarioCode  string,
+String  eventCode string,
+String  eventTime string,
+String  activities    string,
+String  activityCode  string,
+String  childActivities   string,
+String  childActivityCode string,
+String  activityRefuseCode    string,
+String  lables    string,
+String  lableCode string,
+String  ruleExpStr    string,
+String  LableResult   string,
+String  errCode   string,
+String  errMsg    string
+) COMMENT 'pulsar01表'
+    STORED AS parquet
+    customerId,cardNumber,accountNumber,scenarioCode,eventCode,eventTime,activities,activityCode,childActivities,childActivityCode,activityRefuseCode,lables,lableCode,ruleExpStr,LableResult,errCode,errMsg,
+
+
+
+
+customerId cardNumber accountNumber scenarioCode eventCode eventTime activities activityCode childActivities childActivityCode activityRefuseCode lables lableCode ruleExpStr LableResult errCode errMsg
+
+
+./bin/pulsar-client produce persistent://cdcs/common/eventpush-topic   -n 10 -m "customerId cardNumber accountNumber scenarioCode eventCode eventTime activities activityCode childActivities childActivityCode activityRefuseCode lables lableCode ruleExpStr LableResult errCode errMsg"
+bin/flink run -d -t yarn-per-job -c com.spdbccc.Plusar2Hive01

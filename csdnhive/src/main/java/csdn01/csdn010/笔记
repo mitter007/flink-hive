@@ -1,0 +1,37 @@
+用flinksql+hivecatalog的方式测试
+
+①建kafka表和建hive表
+hive采用dt h 分区 kafka表采用处理时间
+SinkHiveTest 在hive表中是产生了数据
+DATE_FORMAT(pt, 'yyyy-MM-dd')
+②
+SinkHiveTest01
+采用dt分区
+DATE_FORMAT(pt, 'yyyy-MM-dd')
+数据也插入进去了
+③④SinkHiveTest001
+hive不分区
+STORED AS parquet;这样就可以了
+④SinkHiveTest00101
+基于③
+加上这一句，就没办法写到hive库里面了
+tableEnv.sqlQuery("select * from t1_pt").execute().print();
+⑤ 基于③
+hive表不分区 kafka表没有pt字段
+删除  "pt AS PROCTIME()\n" + 这个字段是否能写入
+{"id":"27","ts":27,"vc":18}
+可以写进去不是pt字段的问题
+
+数据也是一批一批的写出的，不是一条一条的写出
+⑥
+基于⑤使用现成的hive表，不再自动创建hive表
+
+和之前的区别控制台不会打印hive-session ，
+但是这样也是，数据也可以写进去的，可以直接使用hive库里面的的表
+⑦
+//        configuration.setString("table.exec.source.idle-timeout", "10s");
+基于⑥注释掉这句
+数据也是可以写进hive表的
+写入hive到底和什么有关系呢
+
+结论

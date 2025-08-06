@@ -1,0 +1,39 @@
+一、standalone模式
+启动命令
+在hadoop103下
+bin/flink run -m hadoop102:8081 -c com.spdbccc.StreamWordCount ./job/hive-catalog-1.0-SNAPSHOT.jar
+启动之前先把hadoop103 7777 端口打开
+这里的参数 -m指定了提交到的JobManager，-c指定了入口类。
+
+二、yarn模式
+启动yarn模式
+bin/yarn-session.sh -nm test
+	-d：分离模式，如果你不想让Flink YARN客户端一直前台运行，可以使用这个参数，即使关掉当前对话窗口，YARN session也可以后台运行。
+	-jm（--jobManagerMemory）：配置JobManager所需内存，默认单位MB。
+	-nm（--name）：配置在YARN UI界面上显示的任务名。
+	-qu（--queue）：指定YARN队列名。
+	-tm（--taskManager）：配置每个TaskManager所使用内存。
+1、会话模式提交作业
+bin/flink run  -c com.spdbccc.StreamWordCount ./job/hive-catalog-1.0-SNAPSHOT.jar
+直接cancel掉任务就会停止 但是集群还在运行要kill掉
+2、单作业模式部署提交
+bin/flink run -d -t yarn-per-job -c com.spdbccc.StreamWordCount ./job/hive-catalog-1.0-SNAPSHOT.jar
+这里的application_XXXX_YY是当前应用的ID，<jobId>是作业的ID。注意如果取消作业，整个Flink集群也会停掉。
+直接kill掉
+3、应用模式部署
+
+ bin/flink run-application -t yarn-application -c com.spdbccc.StreamWordCount ./job/hive-catalog-1.0-SNAPSHOT.jar
+
+
+ CREATE TABLE KafkaTable (
+   `id` BIGINT,
+   `item_id` BIGINT,
+   `behavior` STRING
+ ) WITH (
+   'connector' = 'kafka',
+   'topic' = 'catalog01',
+   'properties.bootstrap.servers' = 'hadoop102:9092',
+   'properties.group.id' = 'testGroup',
+   'scan.startup.mode' = 'earliest-offset',
+   'format' = 'json'
+ )

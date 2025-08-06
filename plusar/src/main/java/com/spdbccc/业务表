@@ -1,0 +1,75 @@
+create table ccgl_glacgd
+(
+`id`    varchar(26),
+`organization_number`   int,
+`proc_date` date,
+`gl_acct`   varchar(10),
+`currency_code` varchar(3),
+`cost_center`   varchar(10),
+`gl_class`  varchar(4),
+`gl_name`   varchar(100),
+`gl_main_class` varchar(1),
+`fst_lvl_item`  varchar(10),
+`sec_lvl_item` varchar(10),
+`prev_bal_dr`   decimal(24,2)
+)
+
+
+json
+文件
+
+{"database":"gmall-220623-flink","table":"comment_info","type":"insert","ts":1669162958,"xid":1111,"xoffset":13941,"data":{"id":1595211185799847960,"user_id":119,"nick_name":null,"head_img":null,"sku_id":31,"spu_id":10,"order_id":987,"appraise":"1204","comment_txt":"评论内容：48384811984748167197482849234338563286217912223261","create_time":"2022-08-02 08:22:38","operate_time":null}}
+
+"id":"1001",
+"organization_number":"1",
+"proc_date":"2023-08-08",
+"gl_acct":"1",
+"currency_code":"1",
+"cost_center":"2",
+"gl_class":"3",
+"gl_name":"3",
+"gl_main_class":"3",
+"fst_lvl_item":"4",
+"sec_lvl_item":"3",
+"prev_bal_dr":"23"
+
+
+{"database":"test","table":"clgl_glcher","type":"insert","ts":1669162958,"xid":1111,"xoffset":13941,"data":{"id":"1001",
+"organization_number":"1","proc_date":"2023-08-08","gl_acct":"1","currency_code":"1","cost_center":"2","gl_class":"3","gl_name":"3","gl_main_class":"3","fst_lvl_item":"4","sec_lvl_item":"3","prev_bal_dr":"23"}}
+
+创建hive表
+
+
+`id`    STRING,
+`organization_number`   STRING,
+`proc_date` STRING,
+`gl_acct`   STRING,
+`currency_code` STRING,
+`cost_center`   STRING,
+`gl_class`  STRING,
+`gl_name`   STRING,
+`gl_main_class` STRING,
+`fst_lvl_item`  STRING,
+`sec_lvl_item`  STRING,
+`prev_bal_dr`   decimal(24,2)
+
+
+DROP TABLE IF EXISTS hive_ccgl_glacgd;
+CREATE EXTERNAL TABLE hive_ccgl_glacgd
+(
+    `id`    STRING,
+    `organization_number`   STRING,
+    `proc_date` STRING,
+    `gl_acct`   STRING,
+    `currency_code` STRING,
+    `cost_center`   STRING,
+    `gl_class`  STRING,
+    `gl_name`   STRING,
+    `gl_main_class` STRING,
+    `fst_lvl_item`  STRING,
+    `sec_lvl_item`  STRING,
+    `prev_bal_dr`   decimal(24,2)
+) COMMENT '会计日终余额表'
+    STORED AS parquet
+
+

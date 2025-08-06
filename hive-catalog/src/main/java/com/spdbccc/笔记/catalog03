@@ -1,0 +1,29 @@
+kafka表
+CREATE TABLE KafkaTable (
+  `id` BIGINT,
+  `name` STRING
+) WITH (
+  'connector' = 'kafka',
+  'topic' = 'data',
+  'properties.bootstrap.servers' = 'localhost:9092',
+  'properties.group.id' = 'testGroup',
+  'scan.startup.mode' = 'earliest-offset',
+  'format' = 'csv'
+)
+
+
+hive表
+create table HiveSink(id string,ts bigint,vc int) STORED AS parquet  TBLPROPERTIES ('table.exec.source.idle-timeout'='10s')
+
+hive 表
+SET table.sql-dialect=hive;
+
+CREATE TABLE hivetable (
+  id BIGINT,
+  name STRING
+) PARTITIONED BY (dt STRING, hr STRING) STORED AS parquet TBLPROPERTIES (
+  'partition.time-extractor.timestamp-pattern'='$dt $hr:00:00',
+  'sink.partition-commit.trigger'='partition-time',
+  'sink.partition-commit.delay'='1 h',
+  'sink.partition-commit.policy.kind'='metastore,success-file'
+);

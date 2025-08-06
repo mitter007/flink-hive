@@ -1,0 +1,4 @@
+
+
+/opt/module/flink14/bin/flink run -d -t yarn-per-job -c com.spdbccc.git.git01.FlinkPulsarConsumerExample
+
