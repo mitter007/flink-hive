@@ -26,7 +26,7 @@ public class DeserPulsar implements PulsarDeserializationSchema<String> {
         byte[] data = message.getData();
         JSONObject jsonObject = JSON.parseObject(new String(data));
         jsonObject.put("messageId",messageId);
-        jsonObject.put("topicName",topicName);
+        jsonObject.put("publishTime",publishTime);
         out.collect(jsonObject.toJSONString());
 
 

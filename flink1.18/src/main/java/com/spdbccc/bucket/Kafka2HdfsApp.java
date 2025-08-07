@@ -15,6 +15,8 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.connector.file.sink.FileSink;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -55,7 +57,7 @@ public class Kafka2HdfsApp {
         String flinkAppConfPath = parameterTool.get("flink_hdfs_config_path");
 
         System.out.println("配置路径为: " + flinkAppConfPath);
-        //hlrs_query.properties 加载配置文件
+        //kafka.properties 加载配置文件
         ParameterTool propertistool = ParameterTool.fromPropertiesFile(flinkAppConfPath);
 
 
@@ -81,8 +83,11 @@ public class Kafka2HdfsApp {
         logger.info("offset : {}", offset);
 
         //获取flink的执行环境 设置checkpoint
+        Configuration conf = new Configuration();
+        conf.set(RestOptions.PORT, 10002);
 
-        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
 //        1.12 及以后，flink 以 event time 作为默认的时间语义，并 deprecated 了上述设置 api；
 //        @Deprecated
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
@@ -90,7 +95,12 @@ public class Kafka2HdfsApp {
 
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(2, TimeUnit.MINUTES)));
         //设置checkpoint模式是精准一次
-        env.enableCheckpointing(60 * 60 * 1000L, CheckpointingMode.EXACTLY_ONCE);
+        // 每 5 分钟做一次 checkpoint
+        env.enableCheckpointing(300*1000L);  // 毫秒单位
+
+// 设置 checkpoint 模式（默认就是 EXACTLY_ONCE）
+        env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+
 
 
         //kakfa
@@ -112,7 +122,7 @@ public class Kafka2HdfsApp {
         stream.print("stream>>>>");
         //注册全局的properties
         env.getConfig().setGlobalJobParameters(parameterTool);
-        TableProcess tableProcess = JdbcUtil.query(JdbcUtil.getMySQLConnection(), "select * from leet.table_process", TableProcess.class, true);
+        TableProcess tableProcess = JdbcUtil.query(JdbcUtil.getMySQLConnection(), "select * from leet.table_process where id =1", TableProcess.class, true);
         String sinkTable = tableProcess.getSinkTable();
         String sinkColumns = tableProcess.getSinkColumns();
         //输入的json转换为DataRow
@@ -143,7 +153,7 @@ public class Kafka2HdfsApp {
                 }
             }
         });
-        map.print();
+
 /*        BucketingSink<DataRow> sink = new BucketingSink<>(ROOT_DIR);
         sink.setBucketer(new HlrsPathBucket());
         sink.setWriter(new StringWriter<DataRow>());
@@ -209,6 +219,7 @@ public class Kafka2HdfsApp {
                 sb.append(outVal);
             }
         }
+        System.out.println(sb);
         return new DataRow(sb.toString(), yyyyMMdd, tableName);
 
     }

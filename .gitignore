@@ -36,3 +36,4 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/flink1.18/src/main/resources/output/dim_activity_info/dt=20251222/

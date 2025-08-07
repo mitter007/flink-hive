@@ -10,7 +10,8 @@ package com.spdbccc.common;
  * @Version 1.0
  */
 public class Constant {
-    public static String KAFKA_BROKERS = "hadoop202:9092,hadoop203:9092,hadoop204:9092";
+//    public static String KAFKA_BROKERS = "hadoop202:9092,hadoop203:9092,hadoop204:9092";
+    public static String KAFKA_BROKERS = "hadoop102:9092,hadoop103:9092,hadoop104:9092";
     public static final String TOPIC_DB = "topic_db";
     public static final String TOPIC_LOG = "topic_log";
     public static final String MYSQL_HOST = "hadoop202";

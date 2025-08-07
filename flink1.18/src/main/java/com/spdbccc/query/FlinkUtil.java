@@ -14,6 +14,7 @@ import org.apache.flink.connector.pulsar.source.PulsarSource;
 import org.apache.flink.connector.pulsar.source.enumerator.cursor.StartCursor;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -35,7 +36,7 @@ public class FlinkUtil {
                 .setGroupId(groupId)
                 //.setProperty(ConsumerConfig.ISOLATION_LEVEL_CONFIG,"read_committed")
                 //在生产环境中，一般为了保证消费的精准一次性，需要手动维护偏移量，KafkaSource->KafkaSourceReader->存储偏移量变量
-                //.setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST))
+                .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST))
                 // 从最末尾位点开始消费
                 .setStartingOffsets(OffsetsInitializer.latest())
                 //注意：如果使用Flink提供的SimpleStringSchema对String类型的消息进行反序列化，如果消息为空，会报错
@@ -92,7 +93,7 @@ public class FlinkUtil {
                 .setServiceUrl(Constant.SERVICE_URL)
 //                .setAdminUrl(adminUrl)
                 .setStartCursor(StartCursor.earliest())
-                .setTopics("test01")
+                .setTopics("event")
                 .setDeserializationSchema(new DeserPulsar())
                 .setSubscriptionName("my-subscription")
                 .build();

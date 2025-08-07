@@ -13,6 +13,8 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.connector.file.sink.FileSink;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -52,7 +54,7 @@ public class Pulsart2HdfsApp {
         String flinkAppConfPath = parameterTool.get("flink_hdfs_config_path");
 
         System.out.println("配置路径为: " + flinkAppConfPath);
-        //hlrs_query.properties 加载配置文件
+        //kafka.properties 加载配置文件
         ParameterTool propertistool = ParameterTool.fromPropertiesFile(flinkAppConfPath);
 
 
@@ -69,25 +71,29 @@ public class Pulsart2HdfsApp {
         String kafkaServers = parameterTool.get("kafka.servers");
         String groupID = parameterTool.get("group.id");
         String offset = parameterTool.get("kafka.default.offset");
-        String root_dir=parameterTool.get("root_dir");
+        String root_dir = parameterTool.get("root_dir");
         //debug.log=true 这里是否写错了
-        boolean logDebug = parameterTool.getBoolean("log.debug", true);
+        boolean logDebug = parameterTool.getBoolean("log.debug", false);
         logger.info("TopicName : {}", TopicName);
         logger.info("kafkaServers : {}", kafkaServers);
         logger.info("groupID :{} ", groupID);
         logger.info("offset : {}", offset);
 
         //获取flink的执行环境 设置checkpoint
+        //1.1 指定流处理环境
+        Configuration conf = new Configuration();
+        conf.set(RestOptions.PORT, 10001);
 
-        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
 //        1.12 及以后，flink 以 event time 作为默认的时间语义，并 deprecated 了上述设置 api；
 //        @Deprecated
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        env.setParallelism(4);
 
 
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(2, TimeUnit.MINUTES)));
         //设置checkpoint模式是精准一次
-        env.enableCheckpointing(60 * 60 * 1000L, CheckpointingMode.EXACTLY_ONCE);
+        env.enableCheckpointing( 10 * 1000L, CheckpointingMode.EXACTLY_ONCE);
 
 
         //kakfa
@@ -105,8 +111,8 @@ public class Pulsart2HdfsApp {
         //json数据
         // {"streamId":"7000","HLRS_HDFS_DIR":"hlrs_stream_7000","HLRS_ONCEFILTER":"false","HLRS_SYNC_COUNT":100,
         // "username":"testname1","locationdate":"202102020","other1","vsdv"}
-        DataStreamSource<String> stream = env.fromSource(FlinkUtil.getKafkaSource(TopicName, groupID), WatermarkStrategy.noWatermarks(), "kafkaSource");
-        stream.print("stream>>>>");
+        DataStreamSource<String> stream = env.fromSource(FlinkUtil.getPulsarSource(), WatermarkStrategy.noWatermarks(), "kafkaSource");
+//        stream.print("stream>>>>");
         //注册全局的properties
         env.getConfig().setGlobalJobParameters(parameterTool);
         TableProcess tableProcess = JdbcUtil.query(JdbcUtil.getMySQLConnection(), "select * from leet.table_process", TableProcess.class, true);
@@ -140,7 +146,7 @@ public class Pulsart2HdfsApp {
                 }
             }
         });
-        map.print();
+//        map.print();
 /*        BucketingSink<DataRow> sink = new BucketingSink<>(ROOT_DIR);
         sink.setBucketer(new HlrsPathBucket());
         sink.setWriter(new StringWriter<DataRow>());
@@ -200,12 +206,12 @@ public class Pulsart2HdfsApp {
 
             String val = getAndRemove(inputJson, colName, "");
             String outVal = val.replaceAll("\\|", ",").replaceAll("\n", "").replaceAll("\r", "");
-            if (i < tablecols.length - 1) {
-                sb.append(outVal).append("^");
-            } else {
-                sb.append(outVal);
-            }
+            sb.append(outVal).append("^");
         }
+        String messageId = inputJson.getString("messageId");
+        Long publishTime = inputJson.getLong("publishTime");
+        sb.append(messageId).append("^").append(publishTime);
+        System.out.println(sb.toString());
         return new DataRow(sb.toString(), yyyyMMdd, tableName);
 
     }
