@@ -91,6 +91,8 @@ public static void main(String[] args) throws Exception {
 //        1.12 及以后，flink 以 event time 作为默认的时间语义，并 deprecated 了上述设置 api；
 //        @Deprecated
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+// 两次 checkpoint 的最小间隔时间，为了防止两次 checkpoint 的间隔时间太短
+        env.getCheckpointConfig().setCheckpointInterval(2000);
 
 
         env.setRestartStrategy(RestartStrategies.fixedDelayRestart(10, Time.of(2, TimeUnit.MINUTES)));

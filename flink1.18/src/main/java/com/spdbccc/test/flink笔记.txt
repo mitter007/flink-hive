@@ -1,0 +1,11 @@
+flink提交任务命令常用参数
+
+flink脚本 相当于spark的spark-submit  用来提交任务
+run 用来运行任务
+run-application 应用模式下的命令 作用等同于 run
+-m 在Standalone中指定JobManager 比如 -m hadoop102:8081
+-t yarn运行模式中，用来执行不同的部署模式
+-d 断开客户端的链接 后台运行
+-D 主要是设置一些其他参数的时候用 比如指定-Dyarn.application.queue=hive
+-c 指定全类名
+-p 指定并行度

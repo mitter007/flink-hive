@@ -22,5 +22,4 @@ public class TableProcess {
     String sinkTable;
     String sinkType;
     String sinkColumns;
-
 }
