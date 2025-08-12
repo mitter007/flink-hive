@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.naming.Name;
+import java.sql.Timestamp;
 
 /**
  * ClassName: KafkaBean
@@ -23,4 +24,5 @@ public class KafkaBean {
     String name;
     String email;
     Integer phone;
+    long event_time;
 }

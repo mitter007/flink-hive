@@ -28,7 +28,7 @@ public class FileSinkBucketAssigner implements BucketAssigner<DataRow, String> {
         String hlrs_hdfs_dir = element.getTableName();
         String dt = element.getDt();
 //        return new Path( File.separator + hlrs_hdfs_dir + File.separator + "dt=" + yyyyMMdd) ;
-        return File.separator + hlrs_hdfs_dir + File.separator + "dt=" + dt;
+        return File.separator + hlrs_hdfs_dir + File.separator + dt;
     }
 
     @Override

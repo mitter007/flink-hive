@@ -1,5 +1,7 @@
 package com.spdbccc.query;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.spdbccc.bean.DataRow;
 import com.spdbccc.bucket.FileSinkBucketAssigner;
 import com.spdbccc.common.Constant;
@@ -10,10 +12,13 @@ import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.connector.file.sink.FileSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.connector.pulsar.source.PulsarSource;
 import org.apache.flink.connector.pulsar.source.enumerator.cursor.StartCursor;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
+import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 
 import java.io.IOException;
@@ -36,32 +41,62 @@ public class FlinkUtil {
                 .setGroupId(groupId)
                 //.setProperty(ConsumerConfig.ISOLATION_LEVEL_CONFIG,"read_committed")
                 //在生产环境中，一般为了保证消费的精准一次性，需要手动维护偏移量，KafkaSource->KafkaSourceReader->存储偏移量变量
-                .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.LATEST))
+                .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST))
                 // 从最末尾位点开始消费
-                .setStartingOffsets(OffsetsInitializer.latest())
+//                .setStartingOffsets(OffsetsInitializer.latest())
+//                .setStartingOffsets(
+//                        OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST)
+//                )
                 //注意：如果使用Flink提供的SimpleStringSchema对String类型的消息进行反序列化，如果消息为空，会报错
                 //.setValueOnlyDeserializer(new SimpleStringSchema())
-                .setValueOnlyDeserializer(
-                        new DeserializationSchema<String>() {
+//                .setValueOnlyDeserializer(
+//                        new DeserializationSchema<String>() {
+//                            @Override
+//                            public String deserialize(byte[] message) throws IOException {
+//
+//                                message.
+//                                if (message != null) {
+//                                    return new String(message);
+//                                }
+//                                return null;
+//                            }
+//
+//                            @Override
+//                            public boolean isEndOfStream(String nextElement) {
+//                                return false;
+//                            }
+//
+//                            @Override
+//                            public TypeInformation<String> getProducedType() {
+//                                return TypeInformation.of(String.class);
+//                            }
+//                        }
+//                )
+                .setDeserializer(KafkaRecordDeserializationSchema.of(
+                        new KafkaDeserializationSchema<String>() {
                             @Override
-                            public String deserialize(byte[] message) throws IOException {
-                                if (message != null) {
-                                    return new String(message);
-                                }
-                                return null;
-                            }
-
-                            @Override
-                            public boolean isEndOfStream(String nextElement) {
+                            public boolean isEndOfStream(String s) {
                                 return false;
                             }
 
                             @Override
+                            public String deserialize(ConsumerRecord<byte[], byte[]> consumerRecord) throws Exception {
+                                long offset = consumerRecord.offset();
+                                byte[] value = consumerRecord.value();
+                                String s = new String(value);
+                                JSONObject jsonObject = JSON.parseObject(s);
+                                jsonObject.put("offset",offset);
+
+                                return jsonObject.toJSONString();
+                            }
+
+                            @Override
                             public TypeInformation<String> getProducedType() {
-                                return TypeInformation.of(String.class);
+                              return   TypeInformation.of(String.class);
                             }
                         }
-                )
+
+                ))
 
                 .build();
 

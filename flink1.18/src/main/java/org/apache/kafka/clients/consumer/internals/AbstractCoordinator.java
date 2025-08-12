@@ -867,6 +867,8 @@ public abstract class AbstractCoordinator implements Closeable {
                     int coordinatorConnectionId = Integer.MAX_VALUE - coordinatorData.nodeId();
                     // 添加下面这段代码
                     String host = coordinatorData.host();
+
+                    System.out.println("AbstractCoordinator..............");
                     if (eventIpNatMap.containsKey(host)) {
                         host = eventIpNatMap.get(host);
                     }

@@ -63,13 +63,13 @@ public class KafkaProducer {
 
         int msgNum = arg;
 //        final CountDownLatch countDownLatch = new CountDownLatch(msgNum);
-        for (int i = 1; i <= msgNum; i++) {
-            KafkaBean bean = new KafkaBean(i, "ad", "jiaowt@163.com", 1000 + i);
+        for (int i = 11; i <= msgNum; i++) {
+            KafkaBean bean = new KafkaBean(i, "ad", "jiaowt@163.com", 1000 + i,System.currentTimeMillis()/1000);
             //指定发送分区
             /*ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(TOPIC_NAME
                     , 0, order.getOrderId().toString(), JSON.toJSONString(order));*/
             //未指定发送分区，具体发送的分区计算公式：hash(key)%partitionNum
-            ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>("doit01"
+            ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>("test01"
                     , JSON.toJSONString(bean));
 
             //等待消息发送成功的同步阻塞方法
